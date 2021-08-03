@@ -18,6 +18,7 @@ namespace PayRollServicesValidation
         /// UC3-update the salary query 
         /// </summary>
         [TestMethod]
+        [TestCategory("UpdateQuery")]
         public void TestUpdateQuery()
         {
             EmployeeModel employeeModel = new EmployeeModel();
@@ -29,6 +30,7 @@ namespace PayRollServicesValidation
         /// UC4-Update the query using stored procedure
         /// </summary>
         [TestMethod]
+        [TestCategory("UpdateQuery")]
         public void TestUpdateQueryUsingStoredProcedure()
         {
             int expected = 1;
@@ -37,6 +39,17 @@ namespace PayRollServicesValidation
             model.BasicPay = 30000000;
             int actual = employeeRepository.UpdateSalaryUsingStoredProcedure(model);
             Assert.AreEqual(actual, expected);
+        }
+        /// <summary>
+        /// UC5-Retrieve data using their name
+        /// </summary>
+        [TestMethod]
+        [TestCategory("RetrieveDataUsingName")]
+        public void TestMethodForRetrieveDataBasedOnName()
+        {
+            model.name = "Arun";
+            var actual = employeeRepository.RetrieveDataUsingTheirName(model);
+            Assert.AreEqual(model.name, actual.name);
         }
     }
 }

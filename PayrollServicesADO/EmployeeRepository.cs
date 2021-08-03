@@ -148,7 +148,64 @@ namespace PayrollServicesADO
                 this.sqlconnection.Close();
             }
         }
-
+        /// <summary>
+        /// UC5-Retrieve data using their name
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public EmployeeModel RetrieveDataUsingTheirName(EmployeeModel model)
+        {
+            int result = 0;
+            try
+            {
+                using (this.sqlconnection)
+                {
+                    //Passing the procedure and connection string
+                    SqlCommand sqlCommand = new SqlCommand("dbo.spRetrieveDataUsingName", this.sqlconnection);
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@name", model.name);
+                    //Open  SQL Connection
+                    sqlconnection.Open();
+                    //SQL reader
+                    SqlDataReader reader = sqlCommand.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            result++;
+                             
+                            model.empId = Convert.ToInt32(reader["empId"]);
+                            model.name = reader["name"].ToString();
+                            model.BasicPay = Convert.ToDouble(reader["BasicPay"]);
+                            model.startDate = reader.GetDateTime(3);
+                            model.emailId = reader["emailId"].ToString();
+                            model.Gender = reader["Gender"].ToString();
+                            model.Department = reader["Department"].ToString();
+                            model.PhoneNumber = Convert.ToDouble(reader["PhoneNumber"]);
+                            model.Address = reader["Address"].ToString();
+                            model.Deductions = Convert.ToDouble(reader["Deductions"]);
+                            model.TaxablePay = Convert.ToDouble(reader["TaxablePay"]);
+                            model.IncomeTax = Convert.ToDouble(reader["IncomeTax"]);
+                            model.NetPay = Convert.ToDouble(reader["NetPay"]);
+                            Console.WriteLine("{0} {1} {2}  {3} {4} {5}  {6}  {7} {8} {9} {10} {11} {12}", model.empId, model.name, model.BasicPay, model.startDate, model.emailId, model.Gender, model.Department, model.PhoneNumber, model.Address, model.Deductions, model.TaxablePay, model.IncomeTax, model.NetPay);
+                            Console.WriteLine("\n");
+                        }
+                        //Closing the reader object
+                        reader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                //Closing the sql connection
+                sqlconnection.Close();
+            }
+            return model;
+        }
     }
 }
 
