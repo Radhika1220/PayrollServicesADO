@@ -41,7 +41,7 @@ namespace PayRollServicesValidation
             Assert.AreEqual(actual, expected);
         }
         /// <summary>
-        /// UC5-Retrieve data using their name
+        /// UC4-Retrieve data using their name
         /// </summary>
         [TestMethod]
         [TestCategory("RetrieveDataUsingName")]
@@ -50,6 +50,16 @@ namespace PayRollServicesValidation
             model.name = "Arun";
             var actual = employeeRepository.RetrieveDataUsingTheirName(model);
             Assert.AreEqual(model.name, actual.name);
+        }
+        /// <summary>
+        /// UC5-Reeturn the count of details between the date range
+        /// </summary>
+        [TestMethod]
+        public void TestMethodForDateRange()
+        {
+            int expected = 4;
+            var actual = employeeRepository.RetrieveDataBasedOnDateRange();
+            Assert.AreEqual(actual, expected);
         }
     }
 }
