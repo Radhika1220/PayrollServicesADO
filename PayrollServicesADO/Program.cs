@@ -14,6 +14,7 @@ namespace PayrollServicesADO
             Console.WriteLine("3.Update the Salary Using Stored Procedure");
             Console.WriteLine("4.Retrieve Data Using Name ");
             Console.WriteLine("5.Retrieve employee details between the date range");
+            Console.WriteLine("6.Performing Aggregate functions");
             //Calling the method
             int option = Convert.ToInt32(Console.ReadLine());
             switch (option)
@@ -41,6 +42,10 @@ namespace PayrollServicesADO
                 case 5:
                     EmployeeRepository repository1 = new EmployeeRepository();
                     repository1.RetrieveDataBasedOnDateRange();
+                    break;
+                case 6:
+                    EmployeeRepository repository2 = new EmployeeRepository();
+                    repository2.PerformAggregateFunctions("F");
                     break;
 
             }

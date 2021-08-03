@@ -111,23 +111,23 @@ namespace PayrollServicesADO
         /// <returns></returns>
         public int UpdateSalaryUsingStoredProcedure(EmployeeModel model)
         {
-            int result;  
+            int result;
             try
             {
-                using(this.sqlconnection)
+                using (this.sqlconnection)
                 {
                     //EmployeeModel displayModel = new EmployeeModel();
                     SqlCommand command = new SqlCommand("dbo.UpdateEmployeeDetails", this.sqlconnection);
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("empId", model.empId);
                     command.Parameters.AddWithValue("empName", model.name);
-                    command.Parameters.AddWithValue("BasicPay", model.BasicPay);   
+                    command.Parameters.AddWithValue("BasicPay", model.BasicPay);
                     sqlconnection.Open();
                     result = command.ExecuteNonQuery();
-                    if(result!=0)
+                    if (result != 0)
                     {
                         Console.WriteLine("Updated Successfully using stored procedure");
-                       
+
                     }
                     else
                     {
@@ -138,7 +138,7 @@ namespace PayrollServicesADO
                 }
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return default;
@@ -149,7 +149,7 @@ namespace PayrollServicesADO
             }
         }
         /// <summary>
-        /// UC5-Retrieve data using their name
+        /// UC4-Retrieve data using their name
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -173,7 +173,7 @@ namespace PayrollServicesADO
                         while (reader.Read())
                         {
                             result++;
-                             
+
                             model.empId = Convert.ToInt32(reader["empId"]);
                             model.name = reader["name"].ToString();
                             model.BasicPay = Convert.ToDouble(reader["BasicPay"]);
@@ -212,7 +212,6 @@ namespace PayrollServicesADO
         /// <returns></returns>
         public int RetrieveDataBasedOnDateRange()
         {
-            //string nameList = null;
             int count = 0;
             try
             {
@@ -229,24 +228,21 @@ namespace PayrollServicesADO
                     {
                         while (reader.Read())
                         {
-                            //Display the details 
-                           DisplayEmployeeDetails(reader);
-
-                            //nameList += reader["name"].ToString() + " ";
+                            //Calling the display method
+                            DisplayEmployeeDetails(reader);
                             count++;
                         }
                     }
                     //close reader
                     reader.Close();
                 }
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
             finally
-            { 
+            {
                 sqlconnection.Close();
             }
             return count;
@@ -258,8 +254,9 @@ namespace PayrollServicesADO
         /// <param name="reader"></param>
         public void DisplayEmployeeDetails(SqlDataReader reader)
         {
+            //Creating object for Employeemodel which has fields
             EmployeeModel model = new EmployeeModel();
-            //Read data SqlDataReader and store 
+
 
             model.empId = Convert.ToInt32(reader["empId"]);
             model.name = reader["name"].ToString();
@@ -274,9 +271,54 @@ namespace PayrollServicesADO
             model.TaxablePay = Convert.ToDouble(reader["TaxablePay"]);
             model.IncomeTax = Convert.ToDouble(reader["IncomeTax"]);
             model.NetPay = Convert.ToDouble(reader["NetPay"]);
+
             Console.WriteLine("{0} {1} {2}  {3} {4} {5}  {6}  {7} {8} {9} {10} {11} {12}", model.empId, model.name, model.BasicPay, model.startDate, model.emailId, model.Gender, model.Department, model.PhoneNumber, model.Address, model.Deductions, model.TaxablePay, model.IncomeTax, model.NetPay);
             Console.WriteLine("\n");
 
+        }
+        /// <summary>
+        /// UC6-Performing aggregate functions
+        /// </summary>
+        /// <param name="Gender"></param>
+        /// <returns></returns>
+        public string PerformAggregateFunctions(string Gender)
+        {
+            string result = null;
+            try
+            {
+                string query = @"select sum(BasicPay) as TotalSalary,min(BasicPay) as MinSalary,max(BasicPay) as MaxSalary,Round(avg(BasicPay),0) as AvgSalary,Gender,Count(*) from employee_payroll where Gender =" + "'" + Gender + "'" + " group by Gender";
+                SqlCommand sqlCommand = new SqlCommand(query, this.sqlconnection);
+                sqlconnection.Open();
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine("Total Salary {0}", reader[0]);
+                        Console.WriteLine("Min Salary {0}", reader[1]);
+                        Console.WriteLine("Max Salary {0}", reader[2]);
+                        Console.WriteLine("Average Salary {0}", reader[3]);
+                        Console.WriteLine("Grouped By Gender {0}", reader[4]);
+                        Console.WriteLine("No of employess {0}", reader[5]);
+                        result += reader[4] + " " + reader[0] + " " + reader[1] + " " + reader[2] + " " + reader[3] + " " + reader[5];
+                    }
+                }
+                else
+                {
+                    result = "empty";
+                }
+                reader.Close();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                this.sqlconnection.Close();
+            }
+            return result;
         }
     }
 }
