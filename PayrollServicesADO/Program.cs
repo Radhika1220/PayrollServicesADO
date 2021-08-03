@@ -15,6 +15,10 @@ namespace PayrollServicesADO
             Console.WriteLine("4.Retrieve Data Using Name ");
             Console.WriteLine("5.Retrieve employee details between the date range");
             Console.WriteLine("6.Performing Aggregate functions");
+            Console.WriteLine("*******Using ER Diagram Relationship***************");
+            Console.WriteLine("7.Retrieve data from sql server");
+            Console.WriteLine("8.Update Salary data in table");
+            Console.WriteLine("9.Print the employee details between date range");
             //Calling the method
             int option = Convert.ToInt32(Console.ReadLine());
             switch (option)
@@ -47,9 +51,25 @@ namespace PayrollServicesADO
                     EmployeeRepository repository2 = new EmployeeRepository();
                     repository2.PerformAggregateFunctions("F");
                     break;
-
+                case 7:
+                    ERRepository eRRepository = new ERRepository();
+                    eRRepository.RetrieveAllData();
+                    break;
+                case 8:
+                    ERRepository eRRepository1 = new ERRepository();
+                    eRRepository1.UpdateSalaryQuery();
+                    break;
+                case 9:
+                    ERRepository eRRepository2 = new ERRepository();
+                    eRRepository2.DataBasedOnDateRange();
+                    break;
+                case 10:
+                    ERRepository eRRepository3 = new ERRepository();
+           
+                    eRRepository3.PerformAggregateFunctions("F");
+                    break;
             }
         }
-        }
-    }
+     }
+}
 

@@ -257,7 +257,6 @@ namespace PayrollServicesADO
             //Creating object for Employeemodel which has fields
             EmployeeModel model = new EmployeeModel();
 
-
             model.empId = Convert.ToInt32(reader["empId"]);
             model.name = reader["name"].ToString();
             model.BasicPay = Convert.ToDouble(reader["BasicPay"]);
