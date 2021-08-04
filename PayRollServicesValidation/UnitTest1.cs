@@ -8,11 +8,13 @@ namespace PayRollServicesValidation
     {
         EmployeeRepository employeeRepository;
         EmployeeModel model;
+        Transaction transaction;
         [TestInitialize]
         public void SetUp()
         {
             employeeRepository = new EmployeeRepository();
             model = new EmployeeModel();
+            transaction = new Transaction();
         }
         /// <summary>
         /// UC3-update the salary query 
@@ -129,6 +131,16 @@ namespace PayRollServicesValidation
             string actual = eRRepository.PerformAggregateFunctions(Gender);
             Assert.AreEqual(expected, actual);
         }
-
+        //------------------------Transcation Operation------------
+        /// <summary>
+        /// Insert the values in multiple tables(Using transcation)
+        /// </summary>
+        [TestMethod]
+        public void TestMethodForInsertTheValuesInMultipleTables()
+        {
+            int expected = 1;
+            int actual = transaction.InsertIntoTables();
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

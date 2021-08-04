@@ -19,6 +19,9 @@ namespace PayrollServicesADO
             Console.WriteLine("7.Retrieve data from sql server");
             Console.WriteLine("8.Update Salary data in table");
             Console.WriteLine("9.Print the employee details between date range");
+            Console.WriteLine("10.Performing Aggregate Functions");
+            Console.WriteLine("*******Transcation **********");
+            Console.WriteLine("11.Insert into Tables");
             //Calling the method
             int option = Convert.ToInt32(Console.ReadLine());
             switch (option)
@@ -64,9 +67,12 @@ namespace PayrollServicesADO
                     eRRepository2.DataBasedOnDateRange();
                     break;
                 case 10:
-                    ERRepository eRRepository3 = new ERRepository();
-           
+                    ERRepository eRRepository3 = new ERRepository();      
                     eRRepository3.PerformAggregateFunctions("F");
+                    break;
+                case 11:
+                    Transaction transaction = new Transaction();
+                    transaction.InsertIntoTables();
                     break;
             }
         }
