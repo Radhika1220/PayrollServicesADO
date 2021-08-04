@@ -152,5 +152,23 @@ namespace PayRollServicesValidation
             int actual = transaction.DeleteUsingCasadeDelete();
             Assert.AreEqual(expected, actual);
         }
+        [TestMethod]
+        public void TestMethodAddingNewColumnInEmployeeTable()
+        {
+            string expected = "IsActive Column Added";
+            var actual = transaction.AddIsActiveColumn();
+            Assert.AreEqual(expected, actual);
+        }
+        /// <summary>
+        /// Maintain the list and set the IsActive for 0(non-employees)
+        /// </summary>
+        [DataTestMethod]
+        public void TestMethodForAuditPurpose()
+        {
+            int expected = 1;
+            Transaction transaction = new Transaction();
+            int actual = transaction.MaintainListforAudit(1);
+            Assert.AreEqual(actual, expected);
+        }
     }
 }

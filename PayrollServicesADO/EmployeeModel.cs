@@ -28,7 +28,7 @@ namespace PayrollServicesADO
         public int CompanyID { get; set; }
 
         public string CompanyName { get; set; }
-
+        public int IsActive { get; set; }
 
 
     }
