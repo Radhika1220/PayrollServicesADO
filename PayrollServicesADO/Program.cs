@@ -74,6 +74,8 @@ namespace PayrollServicesADO
                     Transaction transaction = new Transaction();
                     transaction.InsertIntoTables();
                     break;
+               // case 12:
+                 //   Transaction transaction1 = new Transaction(0);
             }
         }
      }
