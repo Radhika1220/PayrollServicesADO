@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Text;
 
 namespace PayrollServicesADO
@@ -10,6 +11,7 @@ namespace PayrollServicesADO
         //Connecting to DB
         public static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Payroll_Services;Integrated Security=True";
         SqlConnection SqlConnection = new SqlConnection(connectionString);
+
         //Transaction Query
         public int  InsertIntoTables()
         {
@@ -28,15 +30,15 @@ namespace PayrollServicesADO
                     //Insert data into Table
                     sqlCommand.CommandText = "Insert into Employee1(Company_Id, EmployeeName, EmployeePhoneNum, EmployeeAddress, StartDate, Gender)values(1,'Revathi','897845732','Adam Street','2021-05-01','F')";
                     sqlCommand.ExecuteNonQuery();
-                    sqlCommand.CommandText = "Insert into PayRollCalculate1 (Employee_Id,BasicPay) values('5','90000')";
+                    sqlCommand.CommandText = "Insert into PayRollCalculate1 (Employee_Id,BasicPay) values('4','90000')";
                     sqlCommand.ExecuteNonQuery();
-                    sqlCommand.CommandText = "update PayRollCalculate1 set Deductions = (BasicPay *20)/100 where Employee_Id = '5'";
+                    sqlCommand.CommandText = "update PayRollCalculate1 set Deductions = (BasicPay *20)/100 where Employee_Id = '4'";
                     sqlCommand.ExecuteNonQuery();
-                    sqlCommand.CommandText = "update PayRollCalculate1 set TaxablePay = (BasicPay - Deductions) where Employee_Id = '5'";
+                    sqlCommand.CommandText = "update PayRollCalculate1 set TaxablePay = (BasicPay - Deductions) where Employee_Id = '4'";
                     sqlCommand.ExecuteNonQuery();
-                    sqlCommand.CommandText = "update PayRollCalculate1 set IncomeTax = (TaxablePay * 10) / 100 where Employee_Id = '5'";
+                    sqlCommand.CommandText = "update PayRollCalculate1 set IncomeTax = (TaxablePay * 10) / 100 where Employee_Id = '4'";
                     sqlCommand.ExecuteNonQuery();
-                    sqlCommand.CommandText = "update PayRollCalculate1 set NetPay = (BasicPay - IncomeTax) where Employee_Id = '5'";
+                    sqlCommand.CommandText = "update PayRollCalculate1 set NetPay = (BasicPay - IncomeTax) where Employee_Id = '4'";
                     sqlCommand.ExecuteNonQuery();
                     sqlCommand.CommandText = "Insert into EmployeeDept values('3','5')";
                     sqlCommand.ExecuteNonQuery();
@@ -176,6 +178,29 @@ inner join DepartmentTable on DepartmentTable.DepartmentId=EmployeeDept.Dept_Id"
             }
             //Close Connection
             SqlConnection.Close();
+        }
+        public bool ImplementingWithoutUsingThread()
+        {
+            try
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                RetrieveAllData();            
+             
+                stopWatch.Stop();
+                Console.WriteLine("Duration without Thread excecution : {0} ", stopWatch.ElapsedMilliseconds);
+                int elapsedTime = Convert.ToInt32(stopWatch.ElapsedMilliseconds);
+                if (elapsedTime != 0)
+                {
+                    return true;
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            return false;
         }
         //Display the employee details
         public void DisplayEmployeeDetails(SqlCommand sqlCommand)
