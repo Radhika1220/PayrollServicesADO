@@ -80,7 +80,15 @@ namespace PayrollServicesADO
                     Transaction transaction2 = new Transaction();
                     transaction2.RetrieveAllData();
                     break;
-
+                case 13:
+                    Transaction transaction3 = new Transaction();
+             
+                    transaction3.ImplementingUsingThread();
+                    break;
+                case 14:
+                    Transaction transaction4 = new Transaction();
+                    transaction4.ImplementingWithoutUsingThread();
+                    break;
             }
         }
      }

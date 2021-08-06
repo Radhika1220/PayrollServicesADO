@@ -171,12 +171,26 @@ namespace PayRollServicesValidation
             int actual = transaction.MaintainListforAudit(1);
             Assert.AreEqual(actual, expected);
         }
+        ///                                            *************Multi threading ***********
+        /// <summary>
+        /// UC1-Calcualting the time without using thread
+        /// </summary>
         [TestMethod]
-
         public void TestMethodForWithoutUsingThread()
         {
             bool expected = true;
             bool actual = transaction.ImplementingWithoutUsingThread();
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// UC1-Calcualting the time using thread
+        /// </summary>
+        [TestMethod]
+        public void TestMethodUsingThread()
+        {
+            bool expected = true;
+            bool actual = transaction.ImplementingUsingThread();
             Assert.AreEqual(expected, actual);
         }
     }
