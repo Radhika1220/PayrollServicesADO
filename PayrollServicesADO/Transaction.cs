@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PayrollServicesADO
@@ -12,7 +13,8 @@ namespace PayrollServicesADO
         //Connecting to DB
         public static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Payroll_Services;Integrated Security=True";
         SqlConnection SqlConnection = new SqlConnection(connectionString);
-
+        //Craete object for lock 
+        private Object myLock = new Object();
         //Transaction Query
         public int  InsertIntoTables()
         {
@@ -46,16 +48,14 @@ namespace PayrollServicesADO
                     //Commit the transaction If successful 
                     sqlTransaction.Commit();
                     Console.WriteLine("Updated Successfully!");
-                    flag = 1;
-             
+                    flag = 1;            
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     //Rollback if not inserted properly
                     sqlTransaction.Rollback();
-                    flag = 0;
-                   
+                    flag = 0;                  
                 }
             }
             return flag;
@@ -157,49 +157,51 @@ namespace PayrollServicesADO
         /// <summary>
         ///Retrieve the data from table
         /// </summary>
-        public void RetrieveAllData()
+        public string RetrieveAllData()
         {
             //Open Connection
             SqlConnection.Open();
-
+            string query = null;
             try
             {
-                string query = @"Select CompanyID,CompanyName,EmployeeID,EmployeeName,EmployeeAddress,IsActive,EmployeePhoneNum,StartDate,Gender,BasicPay,TaxablePay,IncomeTax,NetPay,Deductions,DepartmentId,DepartName
+                 query = @"Select CompanyID,CompanyName,EmployeeID,EmployeeName,EmployeeAddress,IsActive,EmployeePhoneNum,StartDate,Gender,BasicPay,TaxablePay,IncomeTax,NetPay,Deductions,DepartmentId,DepartName
 from Company inner join Employee1 on Company.CompanyID=Employee1.Company_Id and Employee1.IsActive=1
 inner join PayRollCalculate on PayRollCalculate.Employee_Id=Employee1.EmployeeId
 inner join EmployeeDept on EmployeeDept.Employee_Id=Employee1.EmployeeID
 inner join DepartmentTable on DepartmentTable.DepartmentId=EmployeeDept.Dept_Id";
                 SqlCommand sqlCommand = new SqlCommand(query, SqlConnection);
-                DisplayEmployeeDetails(sqlCommand);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+         
             //Close Connection
             SqlConnection.Close();
+            return query;
+
         }
         ///****************MULTI-THREADING-------------
         /// <summary>
         /// UC1-Calculating the time to retrieve the data in database and adding in list(using stopwatch)-->Without using thread
         /// </summary>
         /// <returns></returns>
-        public bool ImplementingWithoutUsingThread()
-        {
+        public bool ImplementingWithoutUsingThread(string query)
+        {       
             try
             {
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-                RetrieveAllData();            
-             
-                stopWatch.Stop();
-                Console.WriteLine("Duration without Thread excecution : {0} ", stopWatch.ElapsedMilliseconds);
-                int elapsedTime = Convert.ToInt32(stopWatch.ElapsedMilliseconds);
-                if (elapsedTime != 0)
-                {
-                    return true;
-                }
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    string q=RetrieveAllData();
+                    SqlCommand sqlCommand = new SqlCommand(q, SqlConnection);
+                    DisplayEmployeeDetailsWithoutThread(sqlCommand);
+                    stopWatch.Stop();
+                    Console.WriteLine("Duration without Thread excecution : {0} ", stopWatch.ElapsedMilliseconds);
+                    int elapsedTime = Convert.ToInt32(stopWatch.ElapsedMilliseconds);
+                    if (elapsedTime != 0)
+                    {
+                        return true;
+                    }
             }
             catch(Exception ex)
             {
@@ -209,26 +211,74 @@ inner join DepartmentTable on DepartmentTable.DepartmentId=EmployeeDept.Dept_Id"
             return false;
         }
         /// <summary>
+        ///  //UC3--->Using Synchronization(lock)--Without using thread
+        /// </summary>
+        /// <param name="query"></param>
+        public bool ImplementingWithoutUsingThread_Lock(string query)
+        {
+            try
+            {
+                lock (myLock)
+                {
+                    ImplementingWithoutUsingThread(query);
+                   
+                }
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
         ///     UC2-Implementing using thread
         /// </summary>
         /// <returns></returns>
-        public bool ImplementingUsingThread()
+        public bool ImplementingUsingThread(string query)
         {
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            RetrieveAllData();
-            stopWatch.Stop();
-            Console.WriteLine("Duration With thread: {0}", stopWatch.ElapsedMilliseconds);
-            if (Convert.ToInt32(stopWatch.ElapsedMilliseconds) != 0)
+          
+         
+                string q= RetrieveAllData();
+                SqlCommand sqlCommand = new SqlCommand(q, SqlConnection);
+                DisplayEmployeeDetailsWithThread(sqlCommand);
+                stopWatch.Stop();
+                Console.WriteLine("Duration With thread: {0}", stopWatch.ElapsedMilliseconds);
+                if (Convert.ToInt32(stopWatch.ElapsedMilliseconds) != 0)
+                {
+                    return true;
+                }
+         
+            return false;
+        }
+        /// <summary>
+        /// //UC3--->Using Synchronization(lock)--Using thread
+        /// </summary>
+        /// <param name="query"></param>
+        public bool ImplementingWithUsingThread_Lock(string query)
+        {
+            try
             {
+                lock (myLock)
+                {
+                    ImplementingUsingThread(query);
+                   
+                }
                 return true;
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             return false;
-
         }
         //Display the employee details
-        public void DisplayEmployeeDetails(SqlCommand sqlCommand)
+        public void DisplayEmployeeDetailsWithThread(SqlCommand sqlCommand)
         {
+            SqlConnection.Open();
             SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
             //Creating the list to add data
             List<EmployeeModel> employeeList = new List<EmployeeModel>();
@@ -257,19 +307,59 @@ inner join DepartmentTable on DepartmentTable.DepartmentId=EmployeeDept.Dept_Id"
                     model.startDate = Convert.ToDateTime(sqlDataReader["StartDate"]);
                     model.IsActive = Convert.ToInt32(sqlDataReader["IsActive"]);
                     //Creating a task and start the thread exection
-                    Task task = new Task(() =>
+                    Thread thread = new Thread(() =>
                       {
                           Console.WriteLine("\nCompany ID: {0} \t Company Name: {1} \nEmployee ID: {2} \t Employee Name: {3} \nBasic Pay: {4} \t Deduction: {5} \t Income Tax: {6} \t Taxable Pay: {7} \t NetPay: {8} \nGender: {9} \t PhoneNumber: {10} \t Department: {11} \t Address: {12} \t Start Date: {13} \t IsActive: {14}", model.CompanyID, model.CompanyName, model.empId, model.name, model.BasicPay, model.Deductions, model.IncomeTax, model.TaxablePay, model.NetPay, model.Gender, model.PhoneNumber, model.Department, model.Address, model.startDate, model.IsActive);
                           employeeList.Add(model);
                       });
-                    task.Start();
-          
+                    thread.Start();
+                    Console.WriteLine("Thread Id: {0} ", thread.ManagedThreadId);              
+              }
+                //Close sqlDataReader Connection
+                sqlDataReader.Close();
+                
+            }
+        }
+        public void DisplayEmployeeDetailsWithoutThread(SqlCommand sqlCommand)
+        {
+            SqlConnection.Open();
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            //Creating the list to add data
+            List<EmployeeModel> employeeList = new List<EmployeeModel>();
+
+            if (sqlDataReader.HasRows)
+            {
+                //Read each row
+                while (sqlDataReader.Read())
+                {
+                    //Creating object for employeemodel
+                    EmployeeModel model = new EmployeeModel();
+
+                    model.empId = Convert.ToInt32(sqlDataReader["EmployeeID"]);
+                    model.CompanyID = Convert.ToInt32(sqlDataReader["CompanyID"]);
+                    model.name = sqlDataReader["EmployeeName"].ToString();
+                    model.CompanyName = sqlDataReader["CompanyName"].ToString();
+                    model.BasicPay = Convert.ToDouble(sqlDataReader["BasicPay"]);
+                    model.Deductions = Convert.ToDouble(sqlDataReader["Deductions"]);
+                    model.IncomeTax = Convert.ToDouble(sqlDataReader["IncomeTax"]);
+                    model.TaxablePay = Convert.ToDouble(sqlDataReader["TaxablePay"]);
+                    model.NetPay = Convert.ToDouble(sqlDataReader["NetPay"]);
+                    model.Gender = Convert.ToString(sqlDataReader["Gender"]);
+                    model.PhoneNumber = Convert.ToInt64(sqlDataReader["EmployeePhoneNum"]);
+                    model.Department = sqlDataReader["DepartName"].ToString();
+                    model.Address = sqlDataReader["EmployeeAddress"].ToString();
+                    model.startDate = Convert.ToDateTime(sqlDataReader["StartDate"]);
+                    model.IsActive = Convert.ToInt32(sqlDataReader["IsActive"]);
+                        Console.WriteLine("\nCompany ID: {0} \t Company Name: {1} \nEmployee ID: {2} \t Employee Name: {3} \nBasic Pay: {4} \t Deduction: {5} \t Income Tax: {6} \t Taxable Pay: {7} \t NetPay: {8} \nGender: {9} \t PhoneNumber: {10} \t Department: {11} \t Address: {12} \t Start Date: {13} \t IsActive: {14}", model.CompanyID, model.CompanyName, model.empId, model.name, model.BasicPay, model.Deductions, model.IncomeTax, model.TaxablePay, model.NetPay, model.Gender, model.PhoneNumber, model.Department, model.Address, model.startDate, model.IsActive);
+                        employeeList.Add(model);
+                             
                 }
                 //Close sqlDataReader Connection
                 sqlDataReader.Close();
+                SqlConnection.Close();
             }
         }
-            }
+    }
 }
 
 

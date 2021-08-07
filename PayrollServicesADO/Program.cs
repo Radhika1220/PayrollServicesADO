@@ -9,6 +9,7 @@ namespace PayrollServicesADO
             //Creating a object for employeerepository
             EmployeeRepository repository = new EmployeeRepository();
             EmployeeModel model = new EmployeeModel();
+         
             Console.WriteLine("1:To Retrieve all Data from Sql server");
              Console.WriteLine ("2:To Update Salary to 3000000");
             Console.WriteLine("3.Update the Salary Using Stored Procedure");
@@ -82,12 +83,20 @@ namespace PayrollServicesADO
                     break;
                 case 13:
                     Transaction transaction3 = new Transaction();
-             
-                    transaction3.ImplementingUsingThread();
+                    string query = null;
+                    transaction3.ImplementingUsingThread(query);
+                
                     break;
                 case 14:
                     Transaction transaction4 = new Transaction();
-                    transaction4.ImplementingWithoutUsingThread();
+                    string query1=null;
+                    transaction4.ImplementingWithoutUsingThread(query1);
+                    break;
+                case 15:
+                    string query2 = null;
+                    Transaction transaction5 = new Transaction();
+                    transaction5.ImplementingWithoutUsingThread_Lock(query2);
+                    //transaction5.ImplementingWithUsingThread_Lock(query2);
                     break;
             }
         }
